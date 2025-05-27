@@ -1,41 +1,58 @@
+# 工作流名称，显示在 GitHub Actions 页面
 name: Python 应用构建
 
+# 触发条件配置
 on:
+  # 当代码推送到以下分支时触发
   push:
-    branches: [ "main" ]
+    branches: [ "main" ]  # 仅当推送到 main 分支时触发
+  # 当针对以下分支创建拉取请求时触发
   pull_request:
-    branches: [ "main" ]
+    branches: [ "main" ]  # 仅当针对 main 分支的 PR 时触发
 
+# 设置工作流的权限
 permissions:
-  contents: read
+  contents: read  # 只读权限，允许检出代码但不能修改
 
+# 定义要执行的任务
 jobs:
+  # 第一个任务：构建和测试
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest  # 使用最新的 Ubuntu 系统作为运行环境
 
+    # 任务步骤定义
     steps:
-    - uses: actions/checkout@v4
-    - name: 安装 Python 3.12
-      uses: actions/setup-python@v3
-      with:
-        python-version: "3.12"
-    - name: 安装依赖
-      run: |
-        python -m pip install --upgrade pip
-        pip install flake8 pytest
+    # 第一步：检出代码库
+    - uses: actions/checkout@v4  # 使用 checkout 动作的 v4 版本检出代码
+    # 第二步：安装 Python
+    - name: 安装 Python 3.12  # 步骤名称，显示在日志中
+      uses: actions/setup-python@v3  # 使用 setup-python 动作
+      with:  # 传递给动作的参数
+        python-version: "3.12"  # 指定要安装的 Python 版本
+    # 第三步：安装依赖
+    - name: 安装依赖  # 步骤名称
+      run: |  # 执行多行 shell 命令
+        python -m pip install --upgrade pip  # 首先升级 pip
+        pip install flake8 pytest  # 安装代码质量检查和测试工具
+        # 如果存在 requirements.txt 文件，则安装其中列出的依赖
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-    - name: 代码检查 (flake8)
-      run: |
+    # 第四步：运行代码检查
+    - name: 代码检查 (flake8)  # 步骤名称
+      run: |  # 执行多行 shell 命令
+        # 运行 flake8 进行严格检查（发现严重错误会失败）
         flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+        # 运行 flake8 进行常规检查（即使发现问题也不失败）
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
     
+  # 第二个任务：使用 PyInstaller 构建可执行文件
   pyinstaller-build:
-    runs-on: windows-latest
+    runs-on: windows-latest  # 使用最新的 Windows 系统作为运行环境
     steps:
-    - name: 生成可执行文件
-      uses: sayyid5416/pyinstaller@v1
-      with:
-        python_ver: '3.12'
-        spec: 'hello.py'
-        upload_exe_with_name: 'hello_app'  # 已修正命名
-        options: --onefile
+    # 第一步：使用 PyInstaller 构建
+    - name: 生成可执行文件  # 步骤名称
+      uses: sayyid5416/pyinstaller@v1  # 使用第三方 PyInstaller 动作
+      with:  # 传递给动作的参数
+        python_ver: '3.12'  # 指定 Python 版本
+        spec: 'hello.py'  # 指定要构建的 Python 文件
+        upload_exe_with_name: 'hello_app'  # 指定生成的可执行文件名称
+        options: --onefile  # 传递给 PyInstaller 的选项，这里指定生成单个文件
