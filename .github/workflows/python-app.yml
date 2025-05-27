@@ -36,12 +36,14 @@ jobs:
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
     
   pyinstaller-build:
-      runs-on:windows-latest
-      steps:
-      - name:Create Executable
-        uses:sayyid5416/pyinstaller@v1
-        with:
-          python_ver:'3.12'
-          spec: 'hello.py'
+    runs-on: windows-latest
+    steps:
+    - name: 生成可执行文件
+      uses: sayyid5416/pyinstaller@v1
+      with:
+        python_ver: '3.12'
+        spec: 'hello.py'
+        upload_exe_with_name: 'hello_app'  # 已修正命名
+        options: --onefile
           upload_exe_with_name: 'hello_package'
           options:--onefile
